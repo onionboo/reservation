@@ -85,7 +85,7 @@ with tab1:
 
 # ---- Tab 2: View Bookings ----
 with tab2:
-    st.header("🗕️ เวลาที่ถูกจอง")
+    st.header("🕒 เวลาที่ถูกจอง")
 
     view_date = st.date_input("เลือกวันที่", datetime.today())
     view_date_str = str(view_date)
