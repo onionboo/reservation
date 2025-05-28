@@ -45,7 +45,7 @@ with tab2:
     view_date_str = str(view_date)
 
     booked_list = st.session_state.reservations.get(view_date_str, [])
-    time_options = [f"{hour:02d}:00" for hour in range(8, 24)]
+    time_options = [f"{hour:02d}:00" for hour in range(9, 24)]
 
     for t in time_options:
         match = next((entry for entry in booked_list if entry['time'] == t), None)
