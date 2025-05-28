@@ -4,7 +4,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 import tempfile
 import json
-
+ 
 # ---- Initialize Firebase only once ----
 
 if not firebase_admin._apps:
