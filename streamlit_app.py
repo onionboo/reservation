@@ -2,12 +2,17 @@ import streamlit as st
 from datetime import datetime
 import firebase_admin
 from firebase_admin import credentials, firestore
+import json
+import tempfile
 
 # ---- Initialize Firebase only once ----
 
 if not firebase_admin._apps:
     firebase_dict = st.secrets["firebase"]
-    cred = credentials.Certificate(firebase_dict)
+    with tempfile.NamedTemporaryFile(mode="w+", delete=False) as f:
+        json.dump(st.secrets["firebase"], f)
+        f.flush()
+    cred = credentials.Certificate(f)
     firebase_admin.initialize_app(cred)
 
 if "firebase_app" not in st.session_state:
