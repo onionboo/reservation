@@ -62,7 +62,7 @@ with tab1:
     date = st.date_input("วันที่ต้องการจอง", datetime.today())
     date_str = str(date)
 
-    time_options = [f"{hour:01d}:00" for hour in range(8, 24)]
+    time_options = [f"{hour:02d}:00" for hour in range(8, 24)]
     time_slot = st.selectbox("เวลาที่ต้องจอง", time_options)
     package = st.selectbox("แพคเกจ", ['Standard 1 คำถาม','Standard 3 คำถาม','Premium A', 'Premium B','Lux 12 เดือน','🕊️ VIP Hocus Pocus'])
 
