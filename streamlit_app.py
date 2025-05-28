@@ -13,13 +13,10 @@ def deep_convert(attr_dict):
 
 # ---- Initialize Firebase only once ----
 if "firebase_app" not in st.session_state:
-    firebase_dict = deep_convert(st.secrets["firebase"])
-    with tempfile.NamedTemporaryFile(mode="w+", delete=False) as f:
-        json.dump(firebase_dict, f)
-        f.flush()
-        cred = credentials.Certificate(f.name)
-        firebase_admin.initialize_app(cred)
-        st.session_state.firebase_app = True
+    key_dict = json.loads(st.secrets["firebase"])
+    creds = service_account.Credentials.from_service_account_info(key_dict)
+    db = firestore.Client(credentials=creds, project="cocdiv-db")
+    st.session_state.firebase_app = True
 
 db = firestore.client()
 collection_name = "reservations"
