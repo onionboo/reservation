@@ -46,9 +46,9 @@ def save_reservation(name, date_str, time_slot, package):
 if "reservations" not in st.session_state:
     st.session_state.reservations = load_reservations()
 
-st.title("🖑 Corridor of Crocus 🕊️")
+st.title("🪻 Corridor of Crocus 🕊️")
 
-tab1, tab2 = st.tabs(["📝 จองเวลา", "🗕️ เวลาที่ถูกจอง"])
+tab1, tab2 = st.tabs(["📝 จองเวลา", "🕒 เวลาที่ถูกจอง"])
 
 # ---- Tab 1: Make Reservation ----
 with tab1:
@@ -77,7 +77,7 @@ with tab1:
             })
             save_reservation(name, date_str, time_slot, package)
             st.session_state.reservations = load_reservations()
-            st.success(f"🅿 จองสำเร็จ: คุณ{name} วันที่ {date} เวลา {time_slot} [{package}]")
+            st.success(f"🈯 จองสำเร็จ: คุณ{name} วันที่ {date} เวลา {time_slot} [{package}]")
 
 # ---- Tab 2: View Bookings ----
 with tab2:

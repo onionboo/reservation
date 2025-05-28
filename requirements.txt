@@ -1,6 +1,4 @@
 streamlit
 datetime 
 firebase_admin
-json
-tempfile
-collections
+google.oauth2
