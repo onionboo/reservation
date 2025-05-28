@@ -2,23 +2,18 @@ import streamlit as st
 from datetime import datetime
 import firebase_admin
 from firebase_admin import credentials, firestore
-import tempfile
+from google.oauth2 import service_account
 import json
-
-# ---- Deep convert AttrDict to native dict ----
-def deep_convert(attr_dict):
-    if isinstance(attr_dict, dict):
-        return {k: deep_convert(v) for k, v in attr_dict.items()}
-    return attr_dict
 
 # ---- Initialize Firebase only once ----
 if "firebase_app" not in st.session_state:
-    key_dict = json.loads(st.secrets["firebase"])
+    key_dict = json.loads(st.secrets["firebase"]["textkey"])
     creds = service_account.Credentials.from_service_account_info(key_dict)
-    db = firestore.Client(credentials=creds, project="cocdiv-db")
+    db = firestore.Client(credentials=creds, project=key_dict["project_id"])
     st.session_state.firebase_app = True
+else:
+    db = firestore.client()
 
-db = firestore.client()
 collection_name = "reservations"
 
 # ---- Load all reservations from Firebase ----
@@ -51,9 +46,9 @@ def save_reservation(name, date_str, time_slot, package):
 if "reservations" not in st.session_state:
     st.session_state.reservations = load_reservations()
 
-st.title("🕑 Corridor of Crocus 🕊️")
+st.title("🖑 Corridor of Crocus 🕊️")
 
-tab1, tab2 = st.tabs(["📝 จองเวลา", "📅 เวลาที่ถูกจอง"])
+tab1, tab2 = st.tabs(["📝 จองเวลา", "🗕️ เวลาที่ถูกจอง"])
 
 # ---- Tab 1: Make Reservation ----
 with tab1:
@@ -64,7 +59,7 @@ with tab1:
     date_str = str(date)
 
     time_options = [f"{hour:02d}:00" for hour in range(9, 24)]
-    time_slot = st.selectbox("เวลาที่ต้องการจอง", time_options)
+    time_slot = st.selectbox("เวลาที่ต้องจอง", time_options)
     package = st.selectbox("แพคเกจ", ['Premium A', 'Premium B'])
 
     if date_str not in st.session_state.reservations:
@@ -81,12 +76,12 @@ with tab1:
                 'package': package
             })
             save_reservation(name, date_str, time_slot, package)
-            st.session_state.reservations = load_reservations()  # ✅ Reload all data
-            st.success(f"🈯 จองสำเร็จ: คุณ{name} วันที่ {date} เวลา {time_slot} [{package}]")
+            st.session_state.reservations = load_reservations()
+            st.success(f"🅿 จองสำเร็จ: คุณ{name} วันที่ {date} เวลา {time_slot} [{package}]")
 
 # ---- Tab 2: View Bookings ----
 with tab2:
-    st.header("📅 เวลาที่ถูกจอง")
+    st.header("🗕️ เวลาที่ถูกจอง")
 
     view_date = st.date_input("เลือกวันที่", datetime.today())
     view_date_str = str(view_date)
