@@ -4,13 +4,16 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 import tempfile
 import json
- 
-# ---- Initialize Firebase only once ----
 
-if not firebase_admin._apps:
-    firebase_dict = dict(st.secrets["firebase"])
-    # cred = credentials.Certificate("firebase_creds.json")
-    # firebase_admin.initialize_app(cred)
+# ---- Deep convert AttrDict to native dict ----
+def deep_convert(attr_dict):
+    if isinstance(attr_dict, dict):
+        return {k: deep_convert(v) for k, v in attr_dict.items()}
+    return attr_dict
+
+# ---- Initialize Firebase only once ----
+if "firebase_app" not in st.session_state:
+    firebase_dict = deep_convert(st.secrets["firebase"])
     with tempfile.NamedTemporaryFile(mode="w+", delete=False) as f:
         json.dump(firebase_dict, f)
         f.flush()
@@ -18,11 +21,8 @@ if not firebase_admin._apps:
         firebase_admin.initialize_app(cred)
         st.session_state.firebase_app = True
 
-if "firebase_app" not in st.session_state:
-    st.session_state.firebase_app = True
-
 db = firestore.client()
-collection_name = "reservations"  # Firestore collection name
+collection_name = "reservations"
 
 # ---- Load all reservations from Firebase ----
 def load_reservations():
@@ -73,7 +73,6 @@ with tab1:
     if date_str not in st.session_state.reservations:
         st.session_state.reservations[date_str] = []
 
-    # Check for duplicate
     booked_times = [entry['time'] for entry in st.session_state.reservations[date_str]]
     if time_slot in booked_times:
         st.warning("⚠️ วัน/เวลานี้มีการจองไว้แล้ว โปรดเลือกช่วงเวลาอื่น ๆ")
@@ -87,7 +86,6 @@ with tab1:
             save_reservation(name, date_str, time_slot, package)
             st.session_state.reservations = load_reservations()  # ✅ Reload all data
             st.success(f"🈯 จองสำเร็จ: คุณ{name} วันที่ {date} เวลา {time_slot} [{package}]")
-
 
 # ---- Tab 2: View Bookings ----
 with tab2:
