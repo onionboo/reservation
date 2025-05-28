@@ -2,28 +2,26 @@ import streamlit as st
 from datetime import datetime
 import firebase_admin
 from firebase_admin import credentials, firestore
-import json
 import tempfile
+import json
 
 # ---- Initialize Firebase only once ----
-from collections.abc import Mapping
-
-def deep_convert(attr_dict):
-    if isinstance(attr_dict, Mapping):
-        return {k: deep_convert(v) for k, v in attr_dict.items()}
-    else:
-        return attr_dict
 
 if not firebase_admin._apps:
-    firebase_dict = deep_convert(st.secrets["firebase"])
-
+    firebase_dict = dict(st.secrets["firebase"])
+    # cred = credentials.Certificate("firebase_creds.json")
+    # firebase_admin.initialize_app(cred)
     with tempfile.NamedTemporaryFile(mode="w+", delete=False) as f:
         json.dump(firebase_dict, f)
         f.flush()
         cred = credentials.Certificate(f.name)
         firebase_admin.initialize_app(cred)
-db = firestore.client()
+        st.session_state.firebase_app = True
 
+if "firebase_app" not in st.session_state:
+    st.session_state.firebase_app = True
+
+db = firestore.client()
 collection_name = "reservations"  # Firestore collection name
 
 # ---- Load all reservations from Firebase ----
@@ -86,8 +84,10 @@ with tab1:
                 'time': time_slot,
                 'package': package
             })
-            save_reservation(name, date_str, time_slot, package)  # 🔥 Save to Firestore
+            save_reservation(name, date_str, time_slot, package)
+            st.session_state.reservations = load_reservations()  # ✅ Reload all data
             st.success(f"🈯 จองสำเร็จ: คุณ{name} วันที่ {date} เวลา {time_slot} [{package}]")
+
 
 # ---- Tab 2: View Bookings ----
 with tab2:
