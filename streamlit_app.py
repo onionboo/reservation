@@ -1,9 +1,46 @@
 import streamlit as st
 from datetime import datetime
+import firebase_admin
+from firebase_admin import credentials, firestore
 
-# ---- Initialize reservations as dictionary ----
-if 'reservations' not in st.session_state:
-    st.session_state.reservations = {}
+# ---- Initialize Firebase only once ----
+if "firebase_app" not in st.session_state:
+    cred = credentials.Certificate("firebase_creds.json")
+    firebase_admin.initialize_app(cred)
+    st.session_state.firebase_app = True
+
+db = firestore.client()
+collection_name = "reservations"  # Firestore collection name
+
+# ---- Load all reservations from Firebase ----
+def load_reservations():
+    docs = db.collection(collection_name).stream()
+    reservations = {}
+    for doc in docs:
+        data = doc.to_dict()
+        date = data["date"]
+        if date not in reservations:
+            reservations[date] = []
+        reservations[date].append({
+            "name": data["name"],
+            "time": data["time"],
+            "package": data["package"]
+        })
+    return reservations
+
+# ---- Save new reservation to Firebase ----
+def save_reservation(name, date_str, time_slot, package):
+    db.collection(collection_name).add({
+        "name": name,
+        "date": date_str,
+        "time": time_slot,
+        "package": package,
+        "timestamp": datetime.now()
+    })
+
+# ---- Initialize reservations in session from Firestore ----
+if "reservations" not in st.session_state:
+    st.session_state.reservations = load_reservations()
 
 st.title("🕑 Corridor of Crocus 🕊️")
 
@@ -35,6 +72,7 @@ with tab1:
                 'time': time_slot,
                 'package': package
             })
+            save_reservation(name, date_str, time_slot, package)  # 🔥 Save to Firestore
             st.success(f"🈯 จองสำเร็จ: คุณ{name} วันที่ {date} เวลา {time_slot} [{package}]")
 
 # ---- Tab 2: View Bookings ----
@@ -45,7 +83,7 @@ with tab2:
     view_date_str = str(view_date)
 
     booked_list = st.session_state.reservations.get(view_date_str, [])
-    time_options = [f"{hour:02d}:00" for hour in range(9, 24)]
+    time_options = [f"{hour:02d}:00" for hour in range(8, 24)]
 
     for t in time_options:
         match = next((entry for entry in booked_list if entry['time'] == t), None)
