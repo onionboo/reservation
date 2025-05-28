@@ -6,11 +6,10 @@ from firebase_admin import credentials, firestore
 # ---- Initialize Firebase only once ----
 
 if not firebase_admin._apps:
-    cred = credentials.Certificate("firebase_creds.json")
+    cred = credentials.Certificate("secrets/firebase_creds.json")
     firebase_admin.initialize_app(cred)
 
 if "firebase_app" not in st.session_state:
-    cred = credentials.Certificate("firebase_creds.json")
     st.session_state.firebase_app = True
 
 db = firestore.client()
