@@ -7,8 +7,10 @@ import tempfile
 
 # ---- Initialize Firebase only once ----
 
+
+
 if not firebase_admin._apps:
-    firebase_dict = st.secrets["firebase"]
+    firebase_dict = dict(st.secrets["firebase"])
     with tempfile.NamedTemporaryFile(mode="w+", delete=False) as f:
         json.dump(st.secrets["firebase"], f)
         f.flush()
