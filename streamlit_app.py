@@ -6,21 +6,24 @@ import json
 import tempfile
 
 # ---- Initialize Firebase only once ----
+from collections.abc import Mapping
 
-
+def deep_convert(attr_dict):
+    if isinstance(attr_dict, Mapping):
+        return {k: deep_convert(v) for k, v in attr_dict.items()}
+    else:
+        return attr_dict
 
 if not firebase_admin._apps:
-    firebase_dict = dict(st.secrets["firebase"])
+    firebase_dict = deep_convert(st.secrets["firebase"])
+
     with tempfile.NamedTemporaryFile(mode="w+", delete=False) as f:
         json.dump(firebase_dict, f)
         f.flush()
-    cred = credentials.Certificate(f)
-    firebase_admin.initialize_app(cred)
-
-if "firebase_app" not in st.session_state:
-    st.session_state.firebase_app = True
-
+        cred = credentials.Certificate(f.name)
+        firebase_admin.initialize_app(cred)
 db = firestore.client()
+
 collection_name = "reservations"  # Firestore collection name
 
 # ---- Load all reservations from Firebase ----
