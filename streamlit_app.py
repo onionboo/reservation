@@ -6,7 +6,8 @@ from firebase_admin import credentials, firestore
 # ---- Initialize Firebase only once ----
 
 if not firebase_admin._apps:
-    cred = credentials.Certificate("secrets/firebase_creds.json")
+    firebase_dict = st.secrets["firebase"]
+    cred = credentials.Certificate(firebase_dict)
     firebase_admin.initialize_app(cred)
 
 if "firebase_app" not in st.session_state:
