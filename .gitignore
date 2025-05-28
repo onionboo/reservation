@@ -1,7 +1,7 @@
 .streamlit/secrets.toml
 firebase_creds.json
 
-# Byte-compiled / optimized / DLL files
+# Byte-compiled / optimized / DLL filesgi
 __pycache__/
 *.py[cod]
 *$py.class
