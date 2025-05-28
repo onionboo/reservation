@@ -10,7 +10,11 @@ if "firebase_app" not in st.session_state:
     key_dict = json.loads(st.secrets["firebase"]["textkey"])
     creds = service_account.Credentials.from_service_account_info(key_dict)
     db = firestore.Client(credentials=creds, project=key_dict["project_id"])
-    firebase_admin.initialize_app(creds,{'projectId': key_dict["project_id"]})
+    if not firebase_admin._apps:
+        creds = credentials.Certificate(key_dict)
+        firebase_admin.initialize_app(creds, {
+            'projectId': key_dict["project_id"]
+        })
     st.session_state.firebase_app = True
 
 db = firestore.client()
