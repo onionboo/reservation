@@ -12,7 +12,7 @@ import tempfile
 if not firebase_admin._apps:
     firebase_dict = dict(st.secrets["firebase"])
     with tempfile.NamedTemporaryFile(mode="w+", delete=False) as f:
-        json.dump(st.secrets["firebase"], f)
+        json.dump(firebase_dict, f)
         f.flush()
     cred = credentials.Certificate(f)
     firebase_admin.initialize_app(cred)
